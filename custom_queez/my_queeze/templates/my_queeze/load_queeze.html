@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Theme Made By www.w3schools.com - No Copyright -->
+  <title>Custom Queeze</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+  <link href="https://fonts.googleapis.com/css?family=Montserrat" rel="stylesheet">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+  <style>
+  body {
+    font: 20px Montserrat, sans-serif;
+    line-height: 1.8;
+    color: #f5f6f7;
+  }
+  p {font-size: 16px;}
+  .margin {margin-bottom: 45px;}
+  .bg-1 {
+    background-color: #1abc9c; /* Green */
+    color: #ffffff;
+  }
+  .bg-2 {
+    background-color: #474e5d; /* Dark Blue */
+    color: #ffffff;
+  }
+  .bg-3 {
+    background-color: #ffffff; /* White */
+    color: #555555;
+  }
+  .bg-4 {
+    background-color: #2f2f2f; /* Black Gray */
+    color: #fff;
+  }
+  .container-fluid {
+    padding-top: 70px;
+    padding-bottom: 70px;
+  }
+  .navbar {
+    padding-top: 15px;
+    padding-bottom: 15px;
+    border: 0;
+    border-radius: 0;
+    margin-bottom: 0;
+    font-size: 12px;
+    letter-spacing: 5px;
+  }
+  .navbar-nav  li a:hover {
+    color: #1abc9c !important;
+  }
+  </style>
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar navbar-default">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="#">Home</a>
+    </div>
+    <div class="collapse navbar-collapse" id="myNavbar">
+      <ul class="nav navbar-nav navbar-right">
+        <li><a href="#">About Us</a></li>
+        <li><a href="#">Blog</a></li>
+        <li><a href="#">Contact Us</a></li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- Third Container (Grid) -->
+<div class="container-fluid bg-3 text-center">
+  <h2 class="margin">Take a Queeze</h2><br>
+  <div class="row">
+    <div class="col-sm-3" style="display:none" id="question_block">
+      <label class="control-label">Country</label>
+      <select class="form-control" id="selected_country" disabled>
+        <option>Country List</option>
+        {% for each_item in country_data %}
+          <option value="{{each_item.id}}" {% if each_item.id == rand_int %}selected{% endif %}>{{each_item.name}}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-sm-3" style="margin-left: 700px;" id="take_queeze_block">
+      <button class="btn btn-lg btn-block btn-primary" onclick="return load_question()">Take Queeze</button>
+    </div>
+    <div class="col-sm-3" style="display:none" id="answer_block">
+      <label class="control-label">Capital</label>
+      <input class="form-control" type="text" placeholder="Enter your answer here" id="entered_value">
+    </div>
+    <div class="col-sm-3" id="submit_ans" style="display:none;">
+      <label class="control-label">Action</label>
+      <button class="btn btn-primary form-control" onclick="return submit_queeze()">Submit</button>
+    </div>
+    <div class="col-sm-3" id="result_block" style="display:none">
+      <label class="control-label">Result</label>
+      <p id="result_is">Result will appear here</p>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-sm-4" id="back_btn" style="display:none;margin-top: 100px;">
+      <button class="btn btn-primary" onclick="return load_take_queeze()">Back</button>
+    </div>
+  </div>
+</div>
+
+<!-- Footer -->
+<footer class="container-fluid bg-4 text-center">
+  <p>All the best <a href="#">Custom Queeze</a></p>
+</footer>
+
+</body>
+</html>
+
+<script>
+  function load_question() {
+    $("#question_block,#answer_block,#result_block,#back_btn,#submit_ans").show();
+    $("#entered_value").val("");
+    $("#result_is").text("Result will appear here");
+    $("#take_queeze_block").hide();
+  }
+
+  function load_take_queeze() {
+    $("#question_block,#answer_block,#result_block,#back_btn,#submit_ans").hide();
+    $("#take_queeze_block").show();
+  }
+
+  function submit_queeze() {
+    entered_value = $.trim($('#entered_value').val());
+    selected_country = $.trim($('#selected_country').val());
+
+    if(entered_value == '') {
+      $('#entered_value').css('border', '1px solid red');
+      $('#entered_value').focus();
+    }
+    if(entered_value != '' & selected_country != '') {
+      $('#entered_value').css('border', '');
+      $.ajax({
+        type: 'GET',
+        url: 'http://127.0.0.1:8000/queeze/validate_answer',
+        data: {
+          'selected_country': selected_country,
+          'entered_value': entered_value
+        },
+        dataType: "json",
+        success:function(response_data) {
+          if (response_data.status == 'TRUE') {
+            $("#result_is").text("Correct Answer");
+          } else {
+            $("#result_is").text("Wrong Answer. Correct answer is: "+response_data.capital_city);
+          }
+        }
+      });
+    }
+  }
+</script>
